@@ -265,7 +265,7 @@ def sidx(arr, fromval, toval):
 def randcolarr(arr):
     " Returns a random color for each row in arr "
     return np.random.rand(1,3).repeat(len(arr),axis=0)
-    
+
 def showfibfvtk(fibarr, colarr, percentage = 100):
     fibarr2 = fibarr[::percentage]
     colarr2 = colarr[::percentage]
@@ -275,7 +275,7 @@ def showfibfvtk(fibarr, colarr, percentage = 100):
     r.SetBackground(1, 1, 1)
     [fvtk.add(r,fvtk.line(ele, colarr2[i,:])) for i, ele in enumerate(fibarr2list)];
     fvtk.show(r, title = "Fibers", size = (500,500))
-    
+
 
 # Perform task
 # ------------
@@ -348,7 +348,7 @@ nodes = mlab.pipeline.glyph(nodesource, scale_factor=3.0, scale_mode='none',\
                               name = 'Nodes', mode='cube')
 nodes.glyph.color_mode = 'color_by_scalar'
 
-vectorsrc = mlab.pipeline.vector_scatter(start_positions[0], 
+vectorsrc = mlab.pipeline.vector_scatter(start_positions[0],
                              start_positions[1],
                              start_positions[2],
                              vectors[0],
@@ -359,7 +359,7 @@ vectorsrc = mlab.pipeline.vector_scatter(start_positions[0],
 # add scalar array
 da = tvtk.DoubleArray(name=edge_key)
 da.from_array(ev)
-            
+
 vectorsrc.mlab_source.dataset.point_data.add_array(da)
 vectorsrc.mlab_source.dataset.point_data.scalars = da.to_array()
 vectorsrc.mlab_source.dataset.point_data.scalars.name = edge_key
@@ -404,7 +404,7 @@ from pylab import imshow, show, title
 # Import NetworkX
 import networkx as nx
 # Import Network based statistic
-import cviewer.libs.pyconto.algorithms.statistics.nbs as nbs
+import cviewer.libs.pyconto.groupstatistics.nbs as nbs
 
 
 # Retrieving the data and set parameters
@@ -413,9 +413,9 @@ import cviewer.libs.pyconto.algorithms.statistics.nbs as nbs
 # Define your groups
 # Retrieve the corresponding CNetwork objects
 firstgroup = cfile.obj.get_by_name(%s)
-first_edge_value = '%s'
+first_edge_value = %s
 secondgroup = cfile.obj.get_by_name(%s)
-second_edge_value = '%s'
+second_edge_value = %s
 THRESH=%s
 K=%s
 TAIL='%s'
@@ -444,7 +444,7 @@ for i, sub in enumerate(firstgroup):
     graph=sub.data
     # Setting the edge requested edge value as weight value
     for u,v,d in graph.edges(data=True):
-        graph[u][v]['weight']=d[first_edge_value]
+        graph[u][v]['weight']=graph[first_edge_value[0]][first_edge_value[1]]['fiber_length_mean']
     # Retrieve the matrix
     X[:,:,i] = nx.to_numpy_matrix(graph)
 
@@ -452,7 +452,7 @@ for i, sub in enumerate(secondgroup):
     graph=sub.data
     # Setting the edge requested edge value as weight value
     for u,v,d in graph.edges(data=True):
-        graph[u][v]['weight']=d[second_edge_value]
+        graph[u][v]['weight']=graph[first_edge_value[0]][first_edge_value[1]]['fiber_length_mean']
     # Retrieve the matrix
     Y[:,:,i] = nx.to_numpy_matrix(graph)
 
@@ -492,7 +492,7 @@ data=np.random.random( (10,10,10))
 min = data.min()
 max = data.max()
 source=mlab.pipeline.scalar_field(data)
-vol = mlab.pipeline.volume(source, vmin=min+0.65*(max-min), 
+vol = mlab.pipeline.volume(source, vmin=min+0.65*(max-min),
                                    vmax=min+0.9*(max-min))
 """
 
@@ -532,7 +532,7 @@ mlab.pipeline.outline(data_src)
 # Create a simple x-aligned image plane widget
 image_plane_widget = mlab.pipeline.image_plane_widget(data_src, name=volname)
 image_plane_widget.ipw.plane_orientation = 'x_axes'
-image_plane_widget.ipw.reslice_interpolate = 'nearest_neighbour'                    
+image_plane_widget.ipw.reslice_interpolate = 'nearest_neighbour'
 """
 
 reportlab = """
@@ -566,28 +566,28 @@ net=a.get_by_name("%s")
 net.load()
 g=net.data
 netw = g
- 
+
 def header(txt, style=HeaderStyle, klass=Paragraph, sep=0.3):
     s = Spacer(0.2*inch, sep*inch)
     para = klass(txt, style)
     sect = [s, para]
     result = KeepTogether(sect)
     return result
- 
+
 def p(txt):
     return header(txt, style=ParaStyle, sep=0.1)
- 
+
 def pre(txt):
     s = Spacer(0.1*inch, 0.1*inch)
     p = Preformatted(txt, PreStyle)
     precomps = [s,p]
     result = KeepTogether(precomps)
     return result
- 
+
 def go():
     doc = SimpleDocTemplate('gfe.pdf')
     doc.build(Elements)
- 
+
 mytitle = header(Title + a.get_connectome_meta().get_title())
 
 mysite = header(URL, sep=0.1, style=ParaStyle)
@@ -596,7 +596,7 @@ mymail = header(email, sep=0.1, style=ParaStyle)
 myabstract = p(Abstract)
 head_info = [mytitle, mysite, mymail]
 
- 
+
 code_title = header("Basic code to produce output")
 code_explain = p("This is a snippet of code. It's an example using the Preformatted flowable object, which
                  makes it easy to put code into your documents. Enjoy!")
