@@ -303,7 +303,7 @@ threedviz2 = """
 
 import networkx as nx
 import numpy as np
-from enthought.mayavi import mlab
+from mayavi import mlab
 
 # Retrieve NetworkX graph
 G = cfile.obj.get_by_name("connectome_freesurferaparc").data
@@ -366,9 +366,6 @@ nipypebet = """
 
 # As an input, you need a T1-weighted image that as an input to the Nipype node.
 rawimage = cfile.obj.get_by_name('MYRAWT1IMAGE')
-
-# Let's check if the metadata agrees with what is expected (it should say "T1-weighted")
-print rawimage.dtype
 
 # We do not necessarily need to load the connectome object - if the connectome file is extracted
 # locally. We just need to retrieve the absolute file path
@@ -450,7 +447,7 @@ cf.xnat_push( connectome_obj = a, projectid = "YOURPROJECTID", subjectid = "SUBJ
 
 surfscript = """
 # Importing Mayavi mlab interface
-from enthought.mayavi import mlab
+from mayavi import mlab
 
 
 # Retrieving the data
@@ -486,6 +483,9 @@ else:
 
 # Create triangular surface mesh
 x, y, z = vertices[:,0], vertices[:,1], vertices[:,2]
+x = x + 128
+y = y + 128
+z = z - 128
 mlab.triangular_mesh(x, y, z, faces, scalars = labels)
 
 """
@@ -645,8 +645,8 @@ netscript = """
 # Importing NumPy
 import numpy as np
 # Importing Mayavi mlab and tvtk packages
-from enthought.mayavi import mlab
-from enthought.tvtk.api import tvtk
+from mayavi import mlab
+from tvtk.api import tvtk
 
 # Retrieving the data and set parameters
 # --------------------------------------
@@ -661,14 +661,13 @@ node_label_key = "%s"
 create_label = []
 
 # Assume node id's are integers
-nr_nodes = len(g.nodes())
+nr_nodes = np.max(g.nodes())
 position_array = np.zeros( (nr_nodes, 3) )
 for i,nodeid in enumerate(g.nodes()):
     pos = g.node[nodeid][position_key]
     # apply a conversion procedure if the position
     # is a tuple store as string
     # we need a numpy array in the end
-    pos = tuple(float(s) for s in pos[1:-1].split(','))
     pos = np.array(pos)
     position_array[i,:] = pos
 
@@ -866,7 +865,7 @@ cfile.update_children()
 """
 
 volrendering = """
-from enthought.mayavi import mlab
+from mayavi import mlab
 import numpy as np
 data=np.random.random( (10,10,10))
 min = data.min()
@@ -878,7 +877,7 @@ vol = mlab.pipeline.volume(source, vmin=min+0.65*(max-min),
 
 volslice = """
 # Import Mayavi mlab interface
-from enthought.mayavi import mlab
+from mayavi import mlab
 # Import NumPy
 import numpy as np
 
@@ -912,7 +911,8 @@ mlab.pipeline.outline(data_src)
 # Create a simple x-aligned image plane widget
 image_plane_widget = mlab.pipeline.image_plane_widget(data_src, name=volname)
 image_plane_widget.ipw.plane_orientation = 'x_axes'
-image_plane_widget.ipw.reslice_interpolate = 'nearest_neighbour'                    
+image_plane_widget.ipw.reslice_interpolate = 'nearest_neighbour'
+image_plane_widget.ipw.slice_index = int(data.shape[0]/2)
 """
 
 reportlab = """
