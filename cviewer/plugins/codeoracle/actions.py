@@ -12,6 +12,40 @@ from cviewer.plugins.ui.preference_manager import preference_manager
 import logging
 logger = logging.getLogger('root.'+__name__)
 
+class PlotLabelsByDegree(Action):
+    tooltip = "Plot labels by degree"
+    description = "Plots node labels for nodes with the specified degree (e.g. 3)"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        from cnetwork_action import NodeLabelByDegreeParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        
+        no = NodeLabelByDegreeParameter(cfile)
+        no.edit_traits(kind='livemodal')
+
+        if not no.netw[no.graph]['name'] == "None":
+            import tempfile
+            import networkx as nx
+            import nipype.interfaces.connectomeviewer as cv
+            
+            myf = tempfile.mktemp(suffix='.py', prefix='my')
+            network = no.netw[no.graph]['name']
+            graph = cfile.obj.get_by_name(network).data
+            tmpname = '/tmp/' + network + '.pck'
+            nx.write_gpickle(graph, tmpname)
+            node_position = no.node_position
+            node_label_key = no.node_label
+            degree = no.degree
+            plot = cv.PlotLabelsByDegree()
+            plot.inputs.in_files = tmpname
+            plot.inputs.position_key = node_position
+            plot.inputs.label_key = node_label_key
+            plot.inputs.degree = degree
+            plot.run()
+
 class PlotEdges(Action):
     tooltip = "Plot edges"
     description = "Plots edges from a selected network"

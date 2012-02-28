@@ -134,70 +134,69 @@ class OpenFile(Action):
 # `OpenCFFFile` class.
 ######################################################################
 class OpenCFile(Action):
-    """ An action that opens a data file depending on the supported
-    extensions.  """
+	""" An action that opens a data file depending on the supported
+	extensions.  """
 
-    name        = "Open CFF File"
-    description = "Open the File Dialog where you can select a .cff or meta.cml file"
-    tooltip     = "Open a CFF file"
-    path        = Str("MenuBar/File/LoadDataMenu")
-    image       = ImageResource("cff-open.png", search_path=[IMAGE_PATH])
+	name        = "Open CFF File"
+	description = "Open the File Dialog where you can select a .cff or meta.cml file"
+	tooltip     = "Open a CFF file"
+	path        = Str("MenuBar/File/LoadDataMenu")
+	image       = ImageResource("cff-open.png", search_path=[IMAGE_PATH])
 
-    # Is the action enabled?
-    enabled = Bool(True)
+	# Is the action enabled?
+	enabled = Bool(True)
 
-    # Is the action visible?
-    visible = Bool(True)
+	# Is the action visible?
+	visible = Bool(True)
 
-    ###########################################################################
-    # 'Action' interface.
-    ###########################################################################
+	###########################################################################
+	# 'Action' interface.
+	###########################################################################
 
-    def perform(self, event, cfile=None):
-        """ Performs the action. """
+	def perform(self, event, cfile=None):
+		""" Performs the action. """
+		
+		logger.info('Performing open connectome file action')
+		
+		# helper variable to use this function not only in the menubar
+		exec_as_funct = True
+		
+		if cfile is None:
+			# get the instance of the current CFile
+			# with the help of the Service Registry
+			cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+			exec_as_funct = False
 
-        logger.info('Performing open connectome file action')
-
-        # helper variable to use this function not only in the menubar
-        exec_as_funct = True
-
-        if cfile is None:
-            # get the instance of the current CFile
-            # with the help of the Service Registry
-            cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
-            exec_as_funct = False
-
-        wildcard = "Connectome Markup File v2.0 (meta.cml)|meta.cml|" \
-                    "Connectome File Format v2.0 (*.cff)|*.cff|" \
-                    "All files (*.*)|*.*"
-        dlg = FileDialog(wildcard=wildcard,title="Choose a Connectome File",\
-                         resizeable=False, \
-                         default_directory=preference_manager.cviewerui.cffpath,)
-
-        if dlg.open() == OK:
-
-            if not os.path.isfile(dlg.path):
-                logger.error("File '%s' does not exist!"%dlg.path)
-                return
-
-            # if file exists and has .cff ending
-            if os.path.exists(dlg.paths[0]) and (dlg.paths[0]).endswith('.cff'):
-
-                # close the cfile if one is currently loaded
-                cfile.close_cfile()
-
-                # load cfile data
-                cfile.load_cfile(dlg.paths[0])
-
-                self.window.status_bar_manager.message=''
-            elif os.path.exists(dlg.paths[0]) and (dlg.paths[0]).endswith('meta.cml'):
-                cfile.close_cfile()
-                cfile.load_cfile(dlg.paths[0], ismetacml = True)
-
-            else:
-                logger.info('Could not load file: '+ dlg.paths)
-
-
+		wildcard = "Connectome File Format v2.0 (*.cff)|*.cff|" \
+			"Connectome Markup File v2.0 (meta.cml)|meta.cml|" \
+			"All files (*.*)|*.*"
+		dlg = FileDialog(wildcard=wildcard,title="Choose a Connectome File",\
+						 resizeable=False, \
+						 default_directory=preference_manager.cviewerui.cffpath,)
+		
+		if dlg.open() == OK:
+			
+			if not os.path.isfile(dlg.path):
+				logger.error("File '%s' does not exist!"%dlg.path)
+				return
+			
+			# if file exists and has .cff ending
+			if os.path.exists(dlg.paths[0]) and (dlg.paths[0]).endswith('.cff'):
+				
+				# close the cfile if one is currently loaded
+				cfile.close_cfile()
+				
+				# load cfile data
+				cfile.load_cfile(dlg.paths[0])
+				
+				self.window.status_bar_manager.message=''
+			elif os.path.exists(dlg.paths[0]) and (dlg.paths[0]).endswith('meta.cml'):
+				cfile.close_cfile()
+				cfile.load_cfile(dlg.paths[0], ismetacml = True)
+			else:
+				logger.info('Could not load file: '+ dlg.paths)
+                
+                
 class SaveCFile(Action):
     """ An action that save aconnectome file """
 

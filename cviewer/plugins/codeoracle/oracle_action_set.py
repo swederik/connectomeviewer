@@ -124,6 +124,13 @@ nipype_PlotLabelsByPhrase = Action(
     path          = "MenuBar/Plotting"
 )
 
+nipype_PlotLabelsByDegree = Action(
+    id            = "NipypePlotLabelsByDegree",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotLabelsByDegree",
+    name          = "Plot Labels By Degree",
+    path          = "MenuBar/Plotting"
+)
+
 
 class OracleActionSet(WorkbenchActionSet):
     """ The actionset for the Oracle plugin """
@@ -146,5 +153,6 @@ class OracleActionSet(WorkbenchActionSet):
         writegexf,
         nipype_PlotNodes,
         nipype_PlotLabelsByPhrase,
+        nipype_PlotLabelsByDegree,
         nipype_PlotEdges,
     ]
