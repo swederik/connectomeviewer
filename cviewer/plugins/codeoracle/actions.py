@@ -12,6 +12,101 @@ from cviewer.plugins.ui.preference_manager import preference_manager
 import logging
 logger = logging.getLogger('root.'+__name__)
 
+class PlotEdges(Action):
+    tooltip = "Plot edges"
+    description = "Plots edges from a selected network"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        from cnetwork_action import EdgeParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        
+        no = EdgeParameter(cfile)
+        no.edit_traits(kind='livemodal')
+
+        if not no.netw[no.graph]['name'] == "None":
+            import tempfile
+            import networkx as nx
+            import nipype.interfaces.connectomeviewer as cv
+            
+            myf = tempfile.mktemp(suffix='.py', prefix='my')
+            network = no.netw[no.graph]['name']
+            graph = cfile.obj.get_by_name(network).data
+            tmpname = '/tmp/' + network + '.pck'
+            nx.write_gpickle(graph, tmpname)
+            node_position = no.node_position
+            edge_key = no.edge_value
+            plot = cv.PlotEdges()
+            plot.inputs.in_files = tmpname
+            plot.inputs.position_key = node_position
+            plot.inputs.edge_key = edge_key
+            plot.run()
+        
+class PlotLabelsByPhrase(Action):
+    tooltip = "Plot labels"
+    description = "Plots node labels that contain the entered text (e.g. occipital)"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        from cnetwork_action import NodeLabelByPhraseParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        
+        no = NodeLabelByPhraseParameter(cfile)
+        no.edit_traits(kind='livemodal')
+
+        if not no.netw[no.graph]['name'] == "None":
+            import tempfile
+            import networkx as nx
+            import nipype.interfaces.connectomeviewer as cv
+            
+            myf = tempfile.mktemp(suffix='.py', prefix='my')
+            network = no.netw[no.graph]['name']
+            graph = cfile.obj.get_by_name(network).data
+            tmpname = '/tmp/' + network + '.pck'
+            nx.write_gpickle(graph, tmpname)
+            node_position = no.node_position
+            node_label_key = no.node_label
+            phrase = no.phrase
+            plot = cv.PlotLabelsByPhrase()
+            plot.inputs.in_files = tmpname
+            plot.inputs.position_key = node_position
+            plot.inputs.label_key = node_label_key
+            plot.inputs.phrase = phrase
+            plot.run()
+        
+class PlotNodes(Action):
+    tooltip = "Plot Nodes"
+    description = "Plots nodes from a selected network"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        from cnetwork_action import NodeParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        
+        no = NodeParameter(cfile)
+        no.edit_traits(kind='livemodal')
+
+        if not no.netw[no.graph]['name'] == "None":
+            import tempfile
+            import networkx as nx
+            myf = tempfile.mktemp(suffix='.py', prefix='my')
+            network = no.netw[no.graph]['name']
+            graph = cfile.obj.get_by_name(network).data
+            tmpname = '/tmp/' + network + '.pck'
+            nx.write_gpickle(graph, tmpname)
+            node_position = no.node_position
+            #node_position = no.scalar_key
+            import nipype.interfaces.connectomeviewer as cv
+            plot = cv.PlotNodes()
+            plot.inputs.in_files = tmpname
+            plot.inputs.position_key = node_position
+            plot.run()
 
 
 class NetworkVizTubes(Action):

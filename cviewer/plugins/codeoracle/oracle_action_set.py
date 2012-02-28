@@ -96,12 +96,32 @@ cortico_cortico = Action(
     path          = "MenuBar/Code Oracle/Connectome/CTrack/Analysis"
 )
 
-
 nipype_bet = Action(
     id            = "OracleNipypeBet",
     class_name    = "cviewer.plugins.codeoracle.actions.NipypeBet",
     name          = "Brain extraction using BET",
     path          = "MenuBar/Code Oracle/Other/Nipype"
+)
+
+nipype_PlotNodes = Action(
+    id            = "NipypePlotNodes",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotNodes",
+    name          = "Plot Nodes",
+    path          = "MenuBar/Plotting"
+)
+
+nipype_PlotEdges = Action(
+    id            = "NipypePlotEdges",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotEdges",
+    name          = "Plot Edges",
+    path          = "MenuBar/Plotting"
+)
+
+nipype_PlotLabelsByPhrase = Action(
+    id            = "NipypePlotLabelsByPhrase",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotLabelsByPhrase",
+    name          = "Plot Labels By Phrase",
+    path          = "MenuBar/Plotting"
 )
 
 
@@ -123,5 +143,8 @@ class OracleActionSet(WorkbenchActionSet):
         xnat_pushpull,
         nipype_bet,
         networkrepo,
-        writegexf
+        writegexf,
+        nipype_PlotNodes,
+        nipype_PlotLabelsByPhrase,
+        nipype_PlotEdges,
     ]
