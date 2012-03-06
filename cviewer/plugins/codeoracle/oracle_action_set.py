@@ -131,6 +131,68 @@ nipype_PlotLabelsByDegree = Action(
     path          = "MenuBar/Plotting"
 )
 
+nipype_PlotNetwork = Action(
+    id            = "NipypePlotNetwork",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotNetwork",
+    name          = "Plot Network",
+    path          = "MenuBar/Plotting"
+)
+
+nipype_RecordVideo = Action(
+    id            = "NipypeRecordVideo",
+    class_name    = "cviewer.plugins.codeoracle.actions.RecordVideo",
+    name          = "Record Video",
+    path          = "MenuBar/Plotting"
+)
+
+nipype_PlotSurface = Action(
+    id            = "NipypePlotSurface",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotSurface",
+    name          = "Plot Surface",
+    path          = "MenuBar/Plotting"
+)
+
+ClearFigure = Action(
+    id            = "ClearFigure",
+    class_name    = "cviewer.plugins.codeoracle.actions.ClearFigure",
+    name          = "Clear Figure",
+    path          = "MenuBar/Plotting"
+)
+
+NewFigure = Action(
+    id            = "NewFigure",
+    class_name    = "cviewer.plugins.codeoracle.actions.NewFigure",
+    name          = "New Figure",
+    path          = "MenuBar/Plotting"
+)
+
+ShowHideEdgeLegend = Action(
+    id            = "ShowHideEdgeLegend",
+    class_name    = "cviewer.plugins.codeoracle.actions.ShowHideEdgeLegend",
+    name          = "Show/Hide Edge Legend",
+    path          = "MenuBar/Plotting"
+)
+
+ShowHideNodeLegend = Action(
+    id            = "ShowHideNodeLegend",
+    class_name    = "cviewer.plugins.codeoracle.actions.ShowHideNodeLegend",
+    name          = "Show/Hide Node Legend",
+    path          = "MenuBar/Plotting"
+)
+
+ShowHideNetworkName = Action(
+    id            = "ShowHideNetworkName",
+    class_name    = "cviewer.plugins.codeoracle.actions.ShowHideNetworkName",
+    name          = "Show/Hide Network Name",
+    path          = "MenuBar/Plotting"
+)
+
+nipype_PlotVolume = Action(
+    id            = "PlotVolume",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotVolume",
+    name          = "Plot Volume",
+    path          = "MenuBar/Plotting"
+)
 
 class OracleActionSet(WorkbenchActionSet):
     """ The actionset for the Oracle plugin """
@@ -155,4 +217,13 @@ class OracleActionSet(WorkbenchActionSet):
         nipype_PlotLabelsByPhrase,
         nipype_PlotLabelsByDegree,
         nipype_PlotEdges,
+        nipype_PlotSurface,
+        nipype_PlotNetwork,
+        nipype_PlotVolume,
+        NewFigure,
+        ClearFigure,
+        ShowHideEdgeLegend,
+        ShowHideNodeLegend,
+        ShowHideNetworkName,
+        #nipype_RecordVideo,
     ]

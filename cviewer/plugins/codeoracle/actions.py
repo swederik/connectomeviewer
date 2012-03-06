@@ -12,6 +12,154 @@ from cviewer.plugins.ui.preference_manager import preference_manager
 import logging
 logger = logging.getLogger('root.'+__name__)
 
+class ShowHideNetworkName(Action):
+    tooltip = "Show/Hide Network Name"
+    description = "Show/Hide Network Name"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+
+        from mayavi import mlab
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
+        #network = no.netw[no.graph]['name']
+        #graph = cfile.obj.get_by_name(network).data
+        x = 0.02
+        y = 0.02
+        width = 0.3
+        text = figure_title
+        mlab.text(x,y,text,width=width)
+        
+class ShowHideNodeLegend(Action):
+    tooltip = "Show/Hide Node Legend"
+    description = "Show/Hide Node Legend"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        from mayavi import mlab
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        mlab.scalarbar(orientation='horizontal')
+
+
+class ShowHideEdgeLegend(Action):
+    tooltip = "Show/Hide Edge Legend"
+    description = "Show/Hide Edge Legend"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        
+        from mayavi import mlab
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        mlab.scalarbar(orientation='vertical')
+        
+class PlotVolume(Action):
+    """ Open a new file in the text editor
+    """
+    tooltip = "Plot Volume"
+    description = "Plot Volume"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        
+        from cvolume_action import VolumeParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        import nibabel as nb
+        import nipype.interfaces.connectomeviewer as cv
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
+        
+        so = VolumeParameter(cfile)
+        choices = False
+        if not len(so.volumes.keys()) == 1:
+            choices = True
+        if choices:
+            so.edit_traits(kind='livemodal')       
+        
+        volume_name = so.volumes[so.volume]['name']
+        if not volume_name == "None":
+            volume = cfile.obj.get_by_name(volume_name).data
+            tmpname = '/tmp/' + volume_name + '.nii'
+            nb.save(volume, tmpname)
+            plot = cv.PlotVolume()
+            plot.inputs.in_files = tmpname
+            plot.inputs.figure_title = figure_title
+            plot.run()
+        
+class NewFigure(Action):
+    tooltip = "New Figure"
+    description = "New Figure"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        
+        from mayavi import mlab
+        mlab.figure()
+
+class ClearFigure(Action):
+    tooltip = "Clear Figure"
+    description = "Clear Figure"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        
+        from mayavi import mlab
+        mlab.clf()
+
+class PlotSurface(Action):
+    """ Open a new file in the text editor
+    """
+    tooltip = "Plot Surface"
+    description = "Plot Surface"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        
+        from csurface_action import SurfaceFileParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        import nibabel.gifti as gifti
+        import nipype.interfaces.connectomeviewer as cv
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
+        
+        so = SurfaceFileParameter(cfile)
+        choices = False
+        if not len(so.surface_da.keys()) == 1:
+            choices = True
+        if choices:
+            so.edit_traits(kind='livemodal')
+        surface_name = so.surface_da[so.surface]['name']
+        label_name = so.labels_da[so.labels]['name']
+        if not surface_name == "None":
+            surface = cfile.obj.get_by_name(surface_name).data
+            tmpname = '/tmp/' + surface_name + '.gii'
+            gifti.write(surface, tmpname)
+            plot = cv.PlotSurface()
+            plot.inputs.in_files = tmpname
+            plot.inputs.figure_title = figure_title
+            if not label_name == "None":
+                labels = cfile.obj.get_by_name(label_name).data
+                tmplabelname = '/tmp/' + label_name + '.gii'
+                gifti.write(labels, tmplabelname)
+                plot.inputs.label_files = tmplabelname
+            plot.run()
+            
 class PlotLabelsByDegree(Action):
     tooltip = "Plot labels by degree"
     description = "Plots node labels for nodes with the specified degree (e.g. 3)"
@@ -22,10 +170,24 @@ class PlotLabelsByDegree(Action):
     def perform(self, event=None):
         from cnetwork_action import NodeLabelByDegreeParameter
         cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
         
         no = NodeLabelByDegreeParameter(cfile)
-        no.edit_traits(kind='livemodal')
-
+        choices = False
+        if len(no.netw.keys()) == 1:
+            for key in no.netw[no.netw.keys()[0]].keys():
+                options = no.netw[no.netw.keys()[0]][key]
+                if isinstance(options, str):
+                    options = [options]
+                if not len(options) == 1:
+                    choices = True
+                    break
+        else:
+            choices = True
+        if choices:
+            no.edit_traits(kind='livemodal')
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
             import networkx as nx
@@ -44,7 +206,62 @@ class PlotLabelsByDegree(Action):
             plot.inputs.position_key = node_position
             plot.inputs.label_key = node_label_key
             plot.inputs.degree = degree
+            plot.inputs.figure_title = figure_title
             plot.run()
+
+class PlotNetwork(Action):
+    tooltip = "Plot Network"
+    description = "Plots nodes and edges from a selected network"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):
+        from cnetwork_action import NoLabelNetworkParameter
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
+
+        no = NoLabelNetworkParameter(cfile)
+        choices = False
+        if len(no.netw.keys()) == 1:
+            for key in no.netw[no.netw.keys()[0]].keys():
+                options = no.netw[no.netw.keys()[0]][key]
+                if isinstance(options, str):
+                    options = [options]
+                if not len(options) == 1:
+                    choices = True
+                    break
+        else:
+            choices = True
+        if choices:
+            no.edit_traits(kind='livemodal')
+        if not no.netw[no.graph]['name'] == "None":
+            import tempfile
+            import networkx as nx
+            import nipype.interfaces.connectomeviewer as cv
+            
+            myf = tempfile.mktemp(suffix='.py', prefix='my')
+            network = no.netw[no.graph]['name']
+            graph = cfile.obj.get_by_name(network).data
+            tmpname = '/tmp/' + network + '.pck'
+            nx.write_gpickle(graph, tmpname)
+            node_position = no.node_position
+            edge_key = no.edge_value
+            
+            edges = cv.PlotEdges()
+            edges.inputs.in_files = tmpname
+            edges.inputs.position_key = node_position
+            edges.inputs.edge_key = edge_key
+            edges.inputs.figure_title = figure_title
+            edges.run()
+
+            nodes = cv.PlotNodes()
+            nodes.inputs.in_files = tmpname
+            nodes.inputs.position_key = node_position
+            nodes.inputs.figure_title = figure_title
+            nodes.run()
 
 class PlotEdges(Action):
     tooltip = "Plot edges"
@@ -56,9 +273,24 @@ class PlotEdges(Action):
     def perform(self, event=None):
         from cnetwork_action import EdgeParameter
         cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
         
         no = EdgeParameter(cfile)
-        no.edit_traits(kind='livemodal')
+        choices = False
+        if len(no.netw.keys()) == 1:
+            for key in no.netw[no.netw.keys()[0]].keys():
+                options = no.netw[no.netw.keys()[0]][key]
+                if isinstance(options, str):
+                    options = [options]
+                if not len(options) == 1:
+                    choices = True
+                    break
+        else:
+            choices = True
+        if choices:
+            no.edit_traits(kind='livemodal')
 
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
@@ -76,6 +308,7 @@ class PlotEdges(Action):
             plot.inputs.in_files = tmpname
             plot.inputs.position_key = node_position
             plot.inputs.edge_key = edge_key
+            plot.inputs.figure_title = figure_title
             plot.run()
         
 class PlotLabelsByPhrase(Action):
@@ -88,6 +321,9 @@ class PlotLabelsByPhrase(Action):
     def perform(self, event=None):
         from cnetwork_action import NodeLabelByPhraseParameter
         cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
         
         no = NodeLabelByPhraseParameter(cfile)
         no.edit_traits(kind='livemodal')
@@ -110,6 +346,7 @@ class PlotLabelsByPhrase(Action):
             plot.inputs.position_key = node_position
             plot.inputs.label_key = node_label_key
             plot.inputs.phrase = phrase
+            plot.inputs.figure_title = figure_title
             plot.run()
         
 class PlotNodes(Action):
@@ -122,9 +359,24 @@ class PlotNodes(Action):
     def perform(self, event=None):
         from cnetwork_action import NodeParameter
         cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
+        from mayavi import mlab
+        currentfig = mlab.gcf()
+        figure_title = currentfig.name
         
         no = NodeParameter(cfile)
-        no.edit_traits(kind='livemodal')
+        choices = False
+        if len(no.netw.keys()) == 1:
+            for key in no.netw[no.netw.keys()[0]].keys():
+                options = no.netw[no.netw.keys()[0]][key]
+                if isinstance(options, str):
+                    options = [options]
+                if not len(options) == 1:
+                    choices = True
+                    break
+        else:
+            choices = True
+        if choices:
+            no.edit_traits(kind='livemodal')
 
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
@@ -140,6 +392,7 @@ class PlotNodes(Action):
             plot = cv.PlotNodes()
             plot.inputs.in_files = tmpname
             plot.inputs.position_key = node_position
+            plot.inputs.figure_title = figure_title
             plot.run()
 
 
