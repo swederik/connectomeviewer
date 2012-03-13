@@ -194,6 +194,13 @@ nipype_PlotVolume = Action(
     path          = "MenuBar/Plotting"
 )
 
+PlotTracks = Action(
+    id            = "PlotTracks",
+    class_name    = "cviewer.plugins.codeoracle.actions.PlotTracks",
+    name          = "Plot Tracks",
+    path          = "MenuBar/Plotting"
+)
+
 class OracleActionSet(WorkbenchActionSet):
     """ The actionset for the Oracle plugin """
     
@@ -225,5 +232,6 @@ class OracleActionSet(WorkbenchActionSet):
         ShowHideEdgeLegend,
         ShowHideNodeLegend,
         ShowHideNetworkName,
+        PlotTracks,
         #nipype_RecordVideo,
     ]

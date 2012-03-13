@@ -12,6 +12,41 @@ from cviewer.plugins.ui.preference_manager import preference_manager
 import logging
 logger = logging.getLogger('root.'+__name__)
 
+
+class PlotTracks(Action):
+    tooltip = "Plots tracks using Dipy's FVTK module"
+    description = "Plots tracks using Dipy's FVTK module"
+
+    # The WorkbenchWindow the action is attached to.
+    window = Any()
+
+    def perform(self, event=None):               
+        from ctrack_action import TrackParameter
+        import nibabel as nb, nibabel.trackvis as trk
+        from dipy.viz import fvtk
+        import numpy as np
+        cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')       
+        so = TrackParameter(cfile)
+        choices = False
+        if not len(so.tracks.keys()) == 1:
+            choices = True
+        if choices:
+            so.edit_traits(kind='livemodal')       
+        track_name = so.tracks[so.tracks.keys()[0]]['name']
+        if not track_name == "None":
+            tracks, header = cfile.obj.get_by_name(track_name).data
+            tmpname = '/tmp/' + track_name + '.trk'
+            trk.write(tmpname, tracks, header)
+            del tracks
+            tracks, hdr = trk.read(tmpname, True, None)           
+            streams_fixed = ((ii[0]) for ii in tracks)
+            #streams = list(streams_fixed)
+            streams = streams_fixed
+            r=fvtk.ren()
+            for stream in streams:
+                fvtk.add(r, fvtk.line(stream, fvtk.blue, opacity=0.2, linewidth=2) )
+            fvtk.show(r, title = "Fibers", size = (500,500))
+
 class ShowHideNetworkName(Action):
     tooltip = "Show/Hide Network Name"
     description = "Show/Hide Network Name"
