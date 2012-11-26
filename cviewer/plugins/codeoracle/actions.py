@@ -11,8 +11,9 @@ from cviewer.plugins.ui.preference_manager import preference_manager
 # Logging imports
 import logging
 logger = logging.getLogger('root.'+__name__)
-from interfaces import (PlotLabelsByDegree, 
-PlotLabelsByPhrase, PlotNodes, PlotEdges, PlotSurface, PlotVolume, RotationMovie)
+from nipype.interfaces.base import isdefined
+from interfaces import (plot_nodes, plot_edges, plot_surfaces, 
+plot_labels_by_phrase, plot_labels_by_degree, plot_volumes, create_rotation_frames)
 
 class PlotTracks(Action):
     tooltip = "Plots tracks using Dipy's FVTK module"
@@ -125,10 +126,11 @@ class PlotVolume(Action):
             volume = cfile.obj.get_by_name(volume_name).data
             tmpname = '/tmp/' + volume_name + '.nii'
             nb.save(volume, tmpname)
-            plot = PlotVolume()
-            plot.inputs.in_files = tmpname
-            plot.inputs.figure_title = figure_title
-            plot.run()
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(tmpname)
+            plot_volumes(tmpname)
         
 class NewFigure(Action):
     tooltip = "New Figure"
@@ -184,15 +186,19 @@ class PlotSurface(Action):
             surface = cfile.obj.get_by_name(surface_name).data
             tmpname = '/tmp/' + surface_name + '.gii'
             gifti.write(surface, tmpname)
-            plot = PlotSurface()
-            plot.inputs.in_files = tmpname
-            plot.inputs.figure_title = figure_title
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(tmpname)
+                
             if not label_name == "None":
                 labels = cfile.obj.get_by_name(label_name).data
                 tmplabelname = '/tmp/' + label_name + '.gii'
                 gifti.write(labels, tmplabelname)
-                plot.inputs.label_files = tmplabelname
-            plot.run()
+                plot_surfaces(tmpname, tmplabelname)
+            else:
+                plot_surfaces(tmpname)            
+            
             
 class PlotLabelsByDegree(Action):
     tooltip = "Plot labels by degree"
@@ -234,13 +240,12 @@ class PlotLabelsByDegree(Action):
             node_position = no.node_position
             node_label_key = no.node_label
             degree = no.degree
-            plot = PlotLabelsByDegree()
-            plot.inputs.in_files = tmpname
-            plot.inputs.position_key = node_position
-            plot.inputs.label_key = node_label_key
-            plot.inputs.degree = degree
-            plot.inputs.figure_title = figure_title
-            plot.run()
+
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(tmpname)
+            plot_labels_by_degree(tmpname, degree, node_position, node_label_key)
 
 class PlotNetwork(Action):
     tooltip = "Plot Network"
@@ -281,19 +286,13 @@ class PlotNetwork(Action):
             nx.write_gpickle(graph, tmpname)
             node_position = no.node_position
             edge_key = no.edge_value
-            
-            edges = PlotEdges()
-            edges.inputs.in_files = tmpname
-            edges.inputs.position_key = node_position
-            edges.inputs.edge_key = edge_key
-            edges.inputs.figure_title = figure_title
-            edges.run()
 
-            nodes = cv.PlotNodes()
-            nodes.inputs.in_files = tmpname
-            nodes.inputs.position_key = node_position
-            nodes.inputs.figure_title = figure_title
-            nodes.run()
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(tmpname)
+            plot_edges(tmpname, node_position, edge_key)
+            plot_nodes(tmpname, node_position, scalar_key='value')
 
 class PlotEdges(Action):
     tooltip = "Plot edges"
@@ -335,12 +334,13 @@ class PlotEdges(Action):
             nx.write_gpickle(graph, tmpname)
             node_position = no.node_position
             edge_key = no.edge_value
-            plot = PlotEdges()
-            plot.inputs.in_files = tmpname
-            plot.inputs.position_key = node_position
-            plot.inputs.edge_key = edge_key
-            plot.inputs.figure_title = figure_title
-            plot.run()
+
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(tmpname)
+            plot_edges(tmpname, node_position, edge_key)
+
         
 class PlotLabelsByPhrase(Action):
     tooltip = "Plot labels"
@@ -371,13 +371,12 @@ class PlotLabelsByPhrase(Action):
             node_position = no.node_position
             node_label_key = no.node_label
             phrase = no.phrase
-            plot = PlotLabelsByPhrase()
-            plot.inputs.in_files = tmpname
-            plot.inputs.position_key = node_position
-            plot.inputs.label_key = node_label_key
-            plot.inputs.phrase = phrase
-            plot.inputs.figure_title = figure_title
-            plot.run()
+            
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(in_file)
+            plot_labels_by_phrase(tmpname, phrase, node_position, node_label_key)
         
 class PlotNodes(Action):
     tooltip = "Plot Nodes"
@@ -417,13 +416,11 @@ class PlotNodes(Action):
             tmpname = '/tmp/' + network + '.pck'
             nx.write_gpickle(graph, tmpname)
             node_position = no.node_position
-            #node_position = no.scalar_key
-            plot = PlotNodes()
-            plot.inputs.in_files = tmpname
-            plot.inputs.position_key = node_position
-            plot.inputs.figure_title = figure_title
-            plot.run()
-
+            if isdefined(figure_title):
+                mlab.figure(figure_title)
+            else:
+                mlab.figure(in_file)
+            plot_nodes(tmpname, node_position, scalar_key='value')
 
 class NetworkVizTubes(Action):
     tooltip = "Show 3D Network with Tubes"
