@@ -11,7 +11,8 @@ from cviewer.plugins.ui.preference_manager import preference_manager
 # Logging imports
 import logging
 logger = logging.getLogger('root.'+__name__)
-
+from interfaces import (PlotLabelsByDegree, 
+PlotLabelsByPhrase, PlotNodes, PlotEdges, PlotSurface, PlotVolume, RotationMovie)
 
 class PlotTracks(Action):
     tooltip = "Plots tracks using Dipy's FVTK module"
@@ -108,7 +109,6 @@ class PlotVolume(Action):
         from cvolume_action import VolumeParameter
         cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
         import nibabel as nb
-        import nipype.interfaces.connectomeviewer as cv
         from mayavi import mlab
         currentfig = mlab.gcf()
         figure_title = currentfig.name
@@ -125,7 +125,7 @@ class PlotVolume(Action):
             volume = cfile.obj.get_by_name(volume_name).data
             tmpname = '/tmp/' + volume_name + '.nii'
             nb.save(volume, tmpname)
-            plot = cv.PlotVolume()
+            plot = PlotVolume()
             plot.inputs.in_files = tmpname
             plot.inputs.figure_title = figure_title
             plot.run()
@@ -168,7 +168,6 @@ class PlotSurface(Action):
         from csurface_action import SurfaceFileParameter
         cfile = self.window.application.get_service('cviewer.plugins.cff2.cfile.CFile')
         import nibabel.gifti as gifti
-        import nipype.interfaces.connectomeviewer as cv
         from mayavi import mlab
         currentfig = mlab.gcf()
         figure_title = currentfig.name
@@ -185,7 +184,7 @@ class PlotSurface(Action):
             surface = cfile.obj.get_by_name(surface_name).data
             tmpname = '/tmp/' + surface_name + '.gii'
             gifti.write(surface, tmpname)
-            plot = cv.PlotSurface()
+            plot = PlotSurface()
             plot.inputs.in_files = tmpname
             plot.inputs.figure_title = figure_title
             if not label_name == "None":
@@ -226,7 +225,6 @@ class PlotLabelsByDegree(Action):
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
             import networkx as nx
-            import nipype.interfaces.connectomeviewer as cv
             
             myf = tempfile.mktemp(suffix='.py', prefix='my')
             network = no.netw[no.graph]['name']
@@ -236,7 +234,7 @@ class PlotLabelsByDegree(Action):
             node_position = no.node_position
             node_label_key = no.node_label
             degree = no.degree
-            plot = cv.PlotLabelsByDegree()
+            plot = PlotLabelsByDegree()
             plot.inputs.in_files = tmpname
             plot.inputs.position_key = node_position
             plot.inputs.label_key = node_label_key
@@ -275,7 +273,6 @@ class PlotNetwork(Action):
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
             import networkx as nx
-            import nipype.interfaces.connectomeviewer as cv
             
             myf = tempfile.mktemp(suffix='.py', prefix='my')
             network = no.netw[no.graph]['name']
@@ -285,7 +282,7 @@ class PlotNetwork(Action):
             node_position = no.node_position
             edge_key = no.edge_value
             
-            edges = cv.PlotEdges()
+            edges = PlotEdges()
             edges.inputs.in_files = tmpname
             edges.inputs.position_key = node_position
             edges.inputs.edge_key = edge_key
@@ -330,7 +327,6 @@ class PlotEdges(Action):
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
             import networkx as nx
-            import nipype.interfaces.connectomeviewer as cv
             
             myf = tempfile.mktemp(suffix='.py', prefix='my')
             network = no.netw[no.graph]['name']
@@ -339,7 +335,7 @@ class PlotEdges(Action):
             nx.write_gpickle(graph, tmpname)
             node_position = no.node_position
             edge_key = no.edge_value
-            plot = cv.PlotEdges()
+            plot = PlotEdges()
             plot.inputs.in_files = tmpname
             plot.inputs.position_key = node_position
             plot.inputs.edge_key = edge_key
@@ -366,7 +362,6 @@ class PlotLabelsByPhrase(Action):
         if not no.netw[no.graph]['name'] == "None":
             import tempfile
             import networkx as nx
-            import nipype.interfaces.connectomeviewer as cv
             
             myf = tempfile.mktemp(suffix='.py', prefix='my')
             network = no.netw[no.graph]['name']
@@ -376,7 +371,7 @@ class PlotLabelsByPhrase(Action):
             node_position = no.node_position
             node_label_key = no.node_label
             phrase = no.phrase
-            plot = cv.PlotLabelsByPhrase()
+            plot = PlotLabelsByPhrase()
             plot.inputs.in_files = tmpname
             plot.inputs.position_key = node_position
             plot.inputs.label_key = node_label_key
@@ -423,8 +418,7 @@ class PlotNodes(Action):
             nx.write_gpickle(graph, tmpname)
             node_position = no.node_position
             #node_position = no.scalar_key
-            import nipype.interfaces.connectomeviewer as cv
-            plot = cv.PlotNodes()
+            plot = PlotNodes()
             plot.inputs.in_files = tmpname
             plot.inputs.position_key = node_position
             plot.inputs.figure_title = figure_title
